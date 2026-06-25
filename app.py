@@ -32,7 +32,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Base da URL do seu modelo Speckle com o token
-url_base_speckle = "https://speckle.systems"
+url_base_speckle = "https://app.speckle.systems/projects/a649da7292/models/815af390c7?embedToken=2aaa49d6f30ad4db0d2844045f56d8ad0ee3bf7643"
 
 # 2. Layout de Tela: Barra Lateral (Métricas Operacionais)
 with st.sidebar:
