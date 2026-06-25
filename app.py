@@ -11,21 +11,11 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Estilização CSS para garantir a harmonia visual, tamanho do visualizador e design dos cards de IA
+# Estilização CSS para garantir a harmonia visual e o tamanho do visualizador 3D
 st.markdown("""
     <style>
     .block-container { padding-top: 1.5rem; padding-bottom: 1rem; }
     iframe { width: 100% !important; height: 1000px !important; border-radius: 12px; }
-    .card-ia {
-        background-color: #f0f7ff;
-        border-left: 5px solid #0066cc;
-        padding: 20px;
-        border-radius: 8px;
-        margin-bottom: 15px;
-    }
-    .badge-alta { background-color: #ffcccc; color: #cc0000; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
-    
-    /* Cores das Legendas BIM */
     .legenda-item { display: flex; align-items: center; margin-bottom: 6px; font-size: 14px; }
     .quadrado-cor { width: 16px; height: 16px; border-radius: 4px; margin-right: 10px; }
     </style>
@@ -98,7 +88,7 @@ with st.sidebar:
             modo_cor = st.toggle("Ativar Visão Cromática por Status", value=True)
             
             if modo_cor:
-                st.markdown(f"""
+                st.markdown("""
                 <div class="legenda-item"><div class="quadrado-cor" style="background-color: #ff4b4b;"></div>🔴 Aberta (Manutenção Urgente)</div>
                 <div class="legenda-item"><div class="quadrado-cor" style="background-color: #28a745;"></div>🟢 Fechado (Ativo em Conformidade)</div>
                 """, unsafe_allow_html=True)
@@ -161,7 +151,7 @@ if arquivo_upload is not None and not df_exibicao.empty:
         st.markdown("**🔎 Seleção de Ativo para Auditoria**")
         os_selecionada = st.selectbox("Selecione a OS para análise da IA:", lista_os_selecao)
         
-        # Correção estrita na indexação da linha selecionada usando .iloc[0]
+        # Puxando a linha da OS selecionada com segurança
         linha_os = df_exibicao[df_exibicao['OS'] == os_selecionada].iloc[0]
         
         st.info(f"""
@@ -179,28 +169,45 @@ if arquivo_upload is not None and not df_exibicao.empty:
         st.markdown("**⚡ Análise de Engenharia Operacional da IA**")
         
         if linha_os['Status'] == 'Aberta':
-            st.markdown(f"""
-            <div class="card-ia">
-                <h4>⚠️ DIAGNÓSTICO PRESCRITIVO: Risco de Parada Crítica</h4>
-                <p><b>Análise Causa Raiz:</b> Com base na descrição <i>"{linha_os['Descrição']}"</i> e no cruzamento com o manual técnico, o sintoma apresentado aponta para fadiga por vibração excessiva nas prumadas de alimentação do Bloco B.</p>
-                <hr>
-                <p><b>🔧 Direcionamento e Plano de Ação para Campo (Alocado para: {linha_os['Responsavel']}):</b></p>
-                <ol>
-                    <li>Isolar a válvula reguladora de pressão hidráulica conforme Seção 4.2 do manual.</li>
-                    <li>Verificar se há microfissuras na junta de expansão flexível.</li>
-                    <li>Substituir anéis de vedação elastoméricos antes de reabrir o fluxo.</li>
-                </ol>
-                <small>⚡ <i>Nível de Criticidade: <span class="badge-alta">ALTA</span> | Ativo ID: {linha_os['ID'][:8]}...</i></small>
-            </div>
-            """, unsafe_allow_html=True)
+            st.error(f"""
+            ⚠️ DIAGNÓSTICO PRESCRITIVO: Risco de Parada Crítica
+            
+            Análise Causa Raiz: Com base na descrição "{linha_os['Descrição']}" e no cruzamento com o manual técnico, o sintoma apresentado aponta para fadiga por vibração excessiva nas prumadas de alimentação do Bloco B.
+            
+            🔧 Direcionamento e Plano de Ação para Campo (Alocado para: {linha_os['Responsavel']}):
+            1. Isolar a válvula reguladora de pressão hidráulica conforme Seção 4.2 do manual.
+            2. Verificar se há microfissuras na junta de expansão flexível.
+            3. Substituir anéis de vedação elastoméricos antes de reabrir o fluxo.
+            
+            Nível de Criticidade: ALTA | Ativo ID: {linha_os['ID'][:8]}...
+            """)
         else:
-            st.markdown(f"""
-            <div class="card-ia" style="background-color: #f6fff6; border-left: 5px solid #28a745;">
-                <h4>✅ ANÁLISE COMPLEMENTAR: Ordem Encerrada</h4>
-                <p><b>Análise de Fechamento:</b> A OS executada por <b>{linha_os['Responsavel']}</b> referente a <i>"{linha_os['Descrição']}"</i> foi devidamente finalizada de acordo com as especificações técnicas do fabricante.</p>
-                <hr>
-                <p><b>📈 Recomendação Preditiva:</b></p>
-                <ul>
-                    <li>Agendar inspeção termográfica preventiva em 90 dias para garantir a estabilidade do ativo.</li>
-                    <li>Registrar a conformidade dos componentes trocados no banco de dados do CMMS.</li>
-                </ul>
+            st.success(f"""
+            ✅ ANÁLISE COMPLEMENTAR: Ordem Encerrada
+            
+            Análise de Fechamento: A OS executada por {linha_os['Responsavel']} referente a "{linha_os['Descrição']}" foi devidamente finalizada de acordo com as especificações técnicas do fabricante.
+            
+            📈 Recomendação Preditiva:
+            * Agendar inspeção termográfica preventiva em 90 dias para garantir a estabilidade do ativo.
+            * Registrar a conformidade dos componentes trocados no banco de dados do CMMS.
+            
+            Status do Ativo: Estável | ID Identificado: {linha_os['ID'][:8]}...
+            """)
+            
+    # --- NOVO BLOCO VISUAL: ANÁLISE DE DESEMPENHO DA EQUIPE ---
+    st.markdown("---")
+    st.subheader("👥 Análise de Produtividade da Equipe Técnica")
+    
+    df_fechadas_resp = df_exibicao[df_exibicao['Status'] == 'Fechado']
+    if not df_fechadas_resp.empty:
+        produtividade = df_fechadas_resp['Responsavel'].value_counts()
+        st.bar_chart(produtividade)
+    else:
+        st.info("Nenhuma ordem fechada encontrada no filtro selecionado para montar o gráfico de barras.")
+        
+else:
+    st.info("Carregue a planilha na barra lateral para ativar o Centro de Diagnóstico Inteligente por IA.")
+
+st.markdown("---")
+st.subheader("📋 Relatório Sincronizado de Ordens de Serviço")
+
