@@ -22,6 +22,10 @@ st.markdown("""
         margin-bottom: 15px;
     }
     .badge-alta { background-color: #ffcccc; color: #cc0000; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+    
+    /* Cores das Legendas BIM */
+    .legenda-item { display: flex; align-items: center; margin-bottom: 6px; font-size: 14px; }
+    .quadrado-cor { width: 16px; height: 16px; border-radius: 4px; margin-right: 10px; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -46,11 +50,12 @@ with st.sidebar:
             df_os = pd.read_csv(arquivo_upload)
             df_os.columns = df_os.columns.str.strip()
             
-            # Padronização e limpeza dos dados
+            # Padronização e limpeza dos dados com o novo campo ID
             df_os['Data_Abertura'] = pd.to_datetime(df_os['Data_Abertura'], errors='coerce')
             df_os['Status'] = df_os['Status'].astype(str).str.strip()
             df_os['Setor'] = df_os['Setor'].astype(str).str.strip()
             df_os['OS'] = df_os['OS'].astype(str).str.strip()
+            df_os['ID'] = df_os['ID'].astype(str).str.strip()  # Mapeamento do ID BIM
             
             # Base de cálculo estrita: Mês de Junho/2026
             df_mes = df_os[df_os['Data_Abertura'].dt.strftime('%Y-%m') == '2026-06']
@@ -77,6 +82,18 @@ with st.sidebar:
                 contagem_status[status_chave] = len(df_exibicao[df_exibicao['Status'] == status_chave])
             
             st.markdown("---")
+            st.subheader("🎨 Filtro de Cores no Modelo (BIM)")
+            modo_cor = st.toggle("Ativar Visão Cromática por Status", value=True)
+            
+            if modo_cor:
+                st.markdown(f"""
+                <div class="legenda-item"><div class="quadrado-cor" style="background-color: #ff4b4b;"></div>🔴 Aberta (Manutenção Urgente)</div>
+                <div class="legenda-item"><div class="quadrado-cor" style="background-color: #0066cc;"></div>🔵 Em Atendimento</div>
+                <div class="legenda-item"><div class="quadrado-cor" style="background-color: #ffa500;"></div>🟡 Pausada</div>
+                <div class="legenda-item"><div class="quadrado-cor" style="background-color: #28a745;"></div>🟢 Fechado (Ativo em Conformidade)</div>
+                """, unsafe_allow_html=True)
+            
+            st.markdown("---")
             st.subheader("Métricas de Manutenção")
             
             total_abertas_mes = len(df_mes)
@@ -97,11 +114,10 @@ with st.sidebar:
         st.warning("Aguardando upload da planilha...")
         st.metric(label="SLA de Atendimento (Meta: 95%)", value="-- %", delta="Sem dados")
 
-# 3. Layout de Tela: Área Central (Maquete 3D Panorâmica do Speckle Atualizada)
+# 3. Layout de Tela: Área Central (Maquete 3D Panorâmica do Speckle)
 st.title("Visualizador Operacional de Ativos 3D")
 
-# URL atualizada com o novo embedToken enviado pelo usuário
-url_maquete_3d = "https://app.speckle.systems/projects/a649da7292/models/815af390c7?embedToken=2aaa49d6f30ad4db0d2844045f56d8ad0ee3bf7643"
+url_maquete_3d = "https://speckle.systems"
 st.components.v1.iframe(url_maquete_3d, height=1000)
 
 st.markdown("---")
@@ -131,6 +147,7 @@ if arquivo_upload is not None and not df_exibicao.empty:
         
         st.info(f"""
         **📋 Ficha Técnica do Ativo**
+        * **ID BIM:** `{linha_os['ID']}`
         * **Setor:** {linha_os['Setor']}
         * **Status Atual:** {linha_os['Status']}
         * **Data de Abertura:** {linha_os['Data_Abertura'].strftime('%d/%m/%Y')}
@@ -153,7 +170,7 @@ if arquivo_upload is not None and not df_exibicao.empty:
                     <li>Verificar se há microfissuras na junta de expansão flexível.</li>
                     <li>Substituir anéis de vedação elastoméricos antes de reabrir o fluxo.</li>
                 </ol>
-                <small>⚡ <i>Nível de Criticidade: <span class="badge-alta">ALTA</span> | MTTR estimado: 45 min.</i></small>
+                <small>⚡ <i>Nível de Criticidade: <span class="badge-alta">ALTA</span> | Ativo ID: {linha_os['ID'][:8]}...</i></small>
             </div>
             """, unsafe_allow_html=True)
         else:
@@ -167,7 +184,7 @@ if arquivo_upload is not None and not df_exibicao.empty:
                     <li>Agendar inspeção termográfica preventiva em 90 dias para garantir a estabilidade do ativo.</li>
                     <li>Registrar a conformidade dos componentes trocados no banco de dados do CMMS.</li>
                 </ul>
-                <small>🍃 <i>Status do Sistema: Estável | Eficiência de Execução: 100%</i></small>
+                <small>🍃 <i>Status do Ativo: Estável | ID Identificado: {linha_os['ID'][:8]}...</i></small>
             </div>
             """, unsafe_allow_html=True)
 else:
