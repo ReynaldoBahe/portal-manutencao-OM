@@ -16,14 +16,6 @@ st.markdown("""
     <style>
     .block-container { padding-top: 1.5rem; padding-bottom: 1rem; }
     iframe { width: 100% !important; height: 750px !important; border-radius: 12px; }
-    .card-ia {
-        background-color: #f0f7ff;
-        border-left: 5px solid #0066cc;
-        padding: 20px;
-        border-radius: 8px;
-        margin-bottom: 15px;
-    }
-    .badge-alta { background-color: #ffcccc; color: #cc0000; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
     .legenda-item { display: flex; align-items: center; margin-bottom: 6px; font-size: 14px; }
     .quadrado-cor { width: 16px; height: 16px; border-radius: 4px; margin-right: 10px; }
     </style>
@@ -139,7 +131,7 @@ st.components.v1.iframe(url_final_speckle, height=750)
 
 st.markdown("---")
 
-# 4. Centro de Diagnóstico Avançado (IA Preditiva)
+# 5. Centro de Diagnóstico Avançado (IA Preditiva)
 st.subheader("🧠 Centro de Diagnóstico Avançado (IA Preditiva)")
 
 if arquivo_upload is not None and not df_exibicao.empty:
@@ -149,7 +141,8 @@ if arquivo_upload is not None and not df_exibicao.empty:
         st.markdown("**🔎 Seleção de Ativo para Auditoria**")
         os_selecionada = st.selectbox("Selecione a OS para análise da IA:", lista_os_selecao)
         
-        linha_os = df_exibicao[df_exibicao['OS'] == os_selecionada].iloc
+        # CORREÇÃO CRÍTICA: Uso do .iloc[0] para extrair a primeira linha do filtro de forma segura
+        linha_os = df_exibicao[df_exibicao['OS'] == os_selecionada].iloc[0]
         
         st.info(f"""
         **📋 Ficha Técnica do Ativo**
@@ -207,8 +200,14 @@ else:
 
 st.markdown("---")
 
-# --- NOVA POSIÇÃO: VOLUMETRIA LOGO ACIMA DA PLANILHA ---
+# --- VOLUMETRIA POSICIONADA LOGO ACIMA DA PLANILHA ---
 st.subheader("📊 Volumetria das Ordens de Serviço")
 col1, col2, col3, col4 = st.columns(4)
 with col1: st.metric(label="🟢 Aberta", value=contagem_status["Aberta"])
 with col2: st.metric(label="🔵 Em Atendimento", value=contagem_status["Em Atendimento"])
+with col3: st.metric(label="🟡 Pausada", value=contagem_status["Pausada"])
+with col4: st.metric(label="🔴 Fechado", value=contagem_status["Fechado"])
+
+st.markdown("---")
+
+# Seção do Relatório Sincronizado na Base
