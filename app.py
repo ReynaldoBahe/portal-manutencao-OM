@@ -141,17 +141,20 @@ if arquivo_upload is not None and not df_exibicao.empty:
         st.markdown("**🔎 Seleção de Ativo para Auditoria**")
         os_selecionada = st.selectbox("Selecione a OS para análise da IA:", lista_os_selecao)
         
-        # Filtro seguro focado na OS selecionada
+        # Filtro focado estritamente na OS selecionada pelo usuário
         df_filtrado_os = df_exibicao[df_exibicao['OS'] == os_selecionada]
         
         if not df_filtrado_os.empty:
-            # EXTRAÇÃO BLINDADA EXTRAINDO APENAS O TEXTO PURO (EVITA LISTAS)
+            # EXTRAÇÃO ULTRA-SEGURA USANDO .iloc[0] PARA TRAZER APENAS O TEXTO LIMPO
             id_bim = str(df_filtrado_os['ID'].values[0])
             responsabel_tecnico = str(df_filtrado_os['Responsavel'].values[0])
             setor_ativo = str(df_filtrado_os['Setor'].values[0])
             status_ativo = str(df_filtrado_os['Status'].values[0])
-            data_abertura = pd.to_datetime(df_filtrado_os['Data_Abertura'].values[0]).strftime('%d/%m/%Y')
             descricao_falha = str(df_filtrado_os['Descrição'].values[0])
+            
+            # Tratamento seguro da data para evitar erros de array do numpy
+            data_raw = df_filtrado_os['Data_Abertura'].values[0]
+            data_abertura = pd.to_datetime(data_raw).strftime('%d/%m/%Y')
             
             st.info(f"""
             **📋 Ficha Técnica do Ativo**
@@ -203,8 +206,3 @@ if arquivo_upload is not None and not df_exibicao.empty:
         produtividade = df_fechadas_resp['Responsavel'].value_counts()
         st.bar_chart(produtividade)
     else:
-        st.info("Nenhuma ordem fechada encontrada no filtro selecionado para montar o gráfico de barras.")
-        
-else:
-    st.info("Carregue a planilha na barra lateral para ativar o Centro de Diagnóstico Inteligente por IA.")
-
