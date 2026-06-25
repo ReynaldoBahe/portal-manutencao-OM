@@ -11,7 +11,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Estilização CSS: Altura calibrada para 750px para valorizar a maquete
+# Estilização CSS: Retornando para uma altura robusta de 750px para valorizar a maquete
 st.markdown("""
     <style>
     .block-container { padding-top: 1.5rem; padding-bottom: 1rem; }
@@ -141,7 +141,7 @@ if arquivo_upload is not None and not df_exibicao.empty:
         st.markdown("**🔎 Seleção de Ativo para Auditoria**")
         os_selecionada = st.selectbox("Selecione a OS para análise da IA:", lista_os_selecao)
         
-        # Puxando a linha da OS selecionada sem quebrar a indexação
+        # --- CORREÇÃO DEFINITIVA DO ILOC COM OS COLCHETES ---
         linha_os = df_exibicao[df_exibicao['OS'] == os_selecionada].iloc[0]
         
         st.info(f"""
@@ -210,7 +210,7 @@ with col4: st.metric(label="🔴 Fechado", value=contagem_status["Fechado"])
 
 st.markdown("---")
 
-# 6. SEÇÃO DO RELATÓRIO CORRIGIDA E BLINDADA
+# 6. SEÇÃO DO RELATÓRIO CORRIGIDA E LIBERADA
 st.subheader("📋 Relatório Sincronizado de Ordens de Serviço")
 
-# Força o Streamlit a exibir o dataframe sem depender de travas lógicas
+if arquivo_upload is not None and not df_exibicao.empty:
