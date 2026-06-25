@@ -71,11 +71,18 @@ with st.sidebar:
             status_selecionado = st.selectbox("Filtrar por Status:", lista_status)
             
             # Aplicando os filtros na tabela de exibição
+            criticidade_selecionada = st.sidebar.selectbox(
+    "Filtrar por Criticidade:",
+    ["Todos", "Alta", "Média", "Baixa"]
+)
             df_exibicao = df_mes.copy()
             if setor_selecionado != "Todos":
                 df_exibicao = df_exibicao[df_exibicao['Setor'] == setor_selecionado]
             if status_selecionado != "Todos":
                 df_exibicao = df_exibicao[df_exibicao['Status'] == status_selecionado]
+                            if criticidade_selecionada != "Todos":
+                df_exibicao = df_exibicao[df_exibicao['Criticidade'] == criticidade_selecionada]
+
             
             # Lista de OS para o seletor da IA
             lista_os_selecao = sorted(list(df_exibicao['OS'].unique()))
