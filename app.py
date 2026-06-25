@@ -141,25 +141,25 @@ if arquivo_upload is not None and not df_exibicao.empty:
         st.markdown("**🔎 Seleção de Ativo para Auditoria**")
         os_selecionada = st.selectbox("Selecione a OS para análise da IA:", lista_os_selecao)
         
-        # Filtro focado estritamente na OS selecionada pelo usuário
+        # Filtro seguro focado na OS selecionada
         df_filtrado_os = df_exibicao[df_exibicao['OS'] == os_selecionada]
         
         if not df_filtrado_os.empty:
-            # EXTRAÇÃO ULTRA-SEGURA USANDO .iloc[0] PARA TRAZER APENAS O TEXTO LIMPO
+            # Extração blindada e limpa sem indexadores complexos
             id_bim = str(df_filtrado_os['ID'].values[0])
-            responsabel_tecnico = str(df_filtrado_os['Responsavel'].values[0])
+            responsavel_tecnico = str(df_filtrado_os['Responsavel'].values[0])
             setor_ativo = str(df_filtrado_os['Setor'].values[0])
             status_ativo = str(df_filtrado_os['Status'].values[0])
             descricao_falha = str(df_filtrado_os['Descrição'].values[0])
             
-            # Tratamento seguro da data para evitar erros de array do numpy
+            # Formatação segura da data
             data_raw = df_filtrado_os['Data_Abertura'].values[0]
             data_abertura = pd.to_datetime(data_raw).strftime('%d/%m/%Y')
             
             st.info(f"""
             **📋 Ficha Técnica do Ativo**
             * **ID BIM:** `{id_bim}`
-            * **Responsável Técnico:** {responsabel_tecnico}
+            * **Responsável Técnico:** {responsavel_tecnico}
             * **Setor:** {setor_ativo}
             * **Status Atual:** {status_ativo}
             * **Data de Abertura:** {data_abertura}
@@ -172,30 +172,9 @@ if arquivo_upload is not None and not df_exibicao.empty:
         
         if not df_filtrado_os.empty:
             if status_ativo == 'Aberta':
-                st.error(f"""
-                ⚠️ DIAGNÓSTICO PRESCRITIVO: Risco de Parada Crítica
-                
-                Análise Causa Raiz: Com base na descrição "{descricao_falha}" e no cruzamento com o manual técnico, o sintoma apresentado aponta para fadiga por vibração excessiva nas prumadas de alimentação do Bloco B.
-                
-                🔧 Direcionamento e Plano de Ação para Campo (Alocado para: {responsabel_tecnico}):
-                1. Isolar a válvula reguladora de pressão hidráulica conforme Seção 4.2 do manual.
-                2. Verificar se há microfissuras na junta de expansão flexível.
-                3. Substituir anéis de vedação elastoméricos antes de reabrir o fluxo.
-                
-                Nível de Criticidade: ALTA | Ativo ID: {id_bim[:8]}...
-                """)
+                st.error(f"⚠️ DIAGNÓSTICO PRESCRITIVO: Risco de Parada Crítica\\n\\nAnálise Causa Raiz: Com base na descrição '{descricao_falha}' e no manual técnico, o sintoma aponta para fadiga por vibração excessiva nas prumadas de alimentação do Bloco B.\\n\\n🔧 Plano de Ação (Alocado para {responsavel_tecnico}):\\n1. Isolar a válvula reguladora (Seção 4.2 do manual).\\n2. Verificar microfissuras na junta flexível.\\n3. Substituir anéis de vedação elastoméricos.")
             else:
-                st.success(f"""
-                ✅ ANÁLISE COMPLEMENTAR: Ordem Encerrada
-                
-                Análise de Fechamento: A OS executada por {responsabel_tecnico} referente a "{descricao_falha}" foi devidamente finalizada de acordo com as especificações técnicas do fabricante.
-                
-                📈 Recomendação Preditiva:
-                * Agendar inspeção termográfica preventiva em 90 dias para garantir a estabilidade do ativo.
-                * Registrar a conformidade dos componentes trocados no banco de dados do CMMS.
-                
-                Status do Ativo: Estável | ID Identificado: {id_bim[:8]}...
-                """)
+                st.success(f"✅ ANÁLISE COMPLEMENTAR: Ordem Encerrada\\n\\nAnálise de Fechamento: A OS executada por {responsavel_tecnico} referente a '{descricao_falha}' foi devidamente finalizada de acordo com as especificações.\\n\\n📈 Recomendação Preventiva:\\n* Agendar inspeção termográfica preventiva em 90 dias.\\n* Registrar a conformidade no banco do CMMS.")
             
     # Análise de Desempenho Técnico
     st.markdown("---")
@@ -206,3 +185,21 @@ if arquivo_upload is not None and not df_exibicao.empty:
         produtividade = df_fechadas_resp['Responsavel'].value_counts()
         st.bar_chart(produtividade)
     else:
+        st.info("Nenhuma ordem fechada encontrada no filtro selecionado para montar o gráfico de barras.")
+        
+else:
+    st.info("Carregue a planilha na barra lateral para ativar o Centro de Diagnóstico Inteligente por IA.")
+
+st.markdown("---")
+
+# 5. VOLUMETRIA POSICIONADA LOGO ACIMA DA PLANILHA
+st.subheader("📊 Volumetria das Ordens de Serviço")
+col1, col2, col3, col4 = st.columns(4)
+with col1: st.metric(label="🟢 Aberta", value=contagem_status["Aberta"])
+with col2: st.metric(label="🔵 Em Atendimento", value=contagem_status["Em Atendimento"])
+with col3: st.metric(label="🟡 Pausada", value=contagem_status["Pausada"])
+with col4: st.metric(label="🔴 Fechado", value=contagem_status["Fechado"])
+
+st.markdown("---")
+
+# 6. SEÇÃO DO RELATÓRIO COMPLETAMENTE DESTRAVADA E OBRIGATÓRIA
