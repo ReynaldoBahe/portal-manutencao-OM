@@ -169,9 +169,9 @@ if arquivo_upload is not None and not df_exibicao.empty:
         
         if not df_filtrado_os.empty:
             if status_ativo == 'Aberta':
-                st.error(f"⚠️ DIAGNÓSTICO PRESCRITIVO: Risco de Parada Crítica\\n\\nAnálise Causa Raiz: Com base na descrição '{descricao_falha}' e no manual técnico, o sintoma aponta para fadiga por vibração excessiva nas prumadas de alimentação do Bloco B.\\n\\n🔧 Plano de Ação (Alocado para {responsavel_tecnico}):\\n1. Isolar a válvula reguladora (Seção 4.2 do manual).\\n2. Verificar microfissuras na junta flexível.\\n3. Substituir anéis de vedação elastoméricos.")
+                st.error(f"⚠️ DIAGNÓSTICO PRESCRITIVO: Risco de Parada Crítica\n\nAnálise Causa Raiz: Com base na descrição '{descricao_falha}' e no manual técnico, o sintoma aponta para fadiga por vibração excessiva nas prumadas de alimentação do Bloco B.\n\n🔧 Plano de Ação (Alocado para {responsavel_tecnico}):\n1. Isolar a válvula reguladora (Seção 4.2 do manual).\n2. Verificar microfissuras na junta flexível.\n3. Substituir anéis de vedação elastoméricos.")
             else:
-                st.success(f"✅ ANÁLISE COMPLEMENTAR: Ordem Encerrada\\n\\nAnálise de Fechamento: A OS executada por {responsavel_tecnico} referente a '{descricao_falha}' foi devidamente finalizada de acordo com as especificações.\\n\\n📈 Recomendação Preventiva:\\n* Agendar inspeção termográfica preventiva em 90 dias.\\n* Registrar a conformidade no banco do CMMS.")
+                st.success(f"✅ ANÁLISE COMPLEMENTAR: Ordem Encerrada\n\nAnálise de Fechamento: A OS executada por {responsavel_tecnico} referente a '{descricao_falha}' foi devidamente finalizada de acordo com as especificações.\n\n📈 Recomendação Preventiva:\n* Agendar inspeção termográfica preventiva em 90 dias.\n* Registrar a conformidade no banco do CMMS.")
             
     # Análise de Desempenho Técnico
     st.markdown("---")
@@ -199,8 +199,9 @@ with col4: st.metric(label="🔴 Fechado", value=contagem_status["Fechado"])
 
 st.markdown("---")
 
-# 6. SEÇÃO DO RELATÓRIO COMPLETAMENTE FORÇADA E LIBERADA
+# 6. SEÇÃO DO RELATÓRIO COMPLETAMENTE DESTRAVADA, ALINHADA E OBRIGATÓRIA
 st.subheader("📋 Relatório Sincronizado de Ordens de Serviço")
 
-# Força a exibição imediata do arquivo carregado, eliminando qualquer verificação oculta
 if arquivo_upload is not None:
+    st.dataframe(df_exibicao, use_container_width=True, height=300)
+else:
