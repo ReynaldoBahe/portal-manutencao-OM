@@ -11,18 +11,18 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Estilização CSS para garantir a harmonia visual e o tamanho do visualizador 3D
+# Estilização CSS: Altura calibrada para 650px para unificar o campo de visão
 st.markdown("""
     <style>
     .block-container { padding-top: 1.5rem; padding-bottom: 1rem; }
-    iframe { width: 100% !important; height: 1000px !important; border-radius: 12px; }
+    iframe { width: 100% !important; height: 650px !important; border-radius: 12px; }
     .legenda-item { display: flex; align-items: center; margin-bottom: 6px; font-size: 14px; }
     .quadrado-cor { width: 16px; height: 16px; border-radius: 4px; margin-right: 10px; }
     </style>
 """, unsafe_allow_html=True)
 
 # Base da URL do seu modelo Speckle com o token
-url_base_speckle = "https://app.speckle.systems/projects/a649da7292/models/815af390c7?embedToken=2aaa49d6f30ad4db0d2844045f56d8ad0ee3bf7643"
+url_base_speckle = "https://speckle.systems"
 
 # 2. Layout de Tela: Barra Lateral (Métricas Operacionais)
 with st.sidebar:
@@ -127,7 +127,7 @@ with st.sidebar:
 st.title("Visualizador Operacional de Ativos 3D")
 
 url_final_speckle = f"{url_base_speckle}{url_modificadores}"
-st.components.v1.iframe(url_final_speckle, height=1000)
+st.components.v1.iframe(url_final_speckle, height=650)
 
 st.markdown("---")
 
@@ -151,7 +151,6 @@ if arquivo_upload is not None and not df_exibicao.empty:
         st.markdown("**🔎 Seleção de Ativo para Auditoria**")
         os_selecionada = st.selectbox("Selecione a OS para análise da IA:", lista_os_selecao)
         
-        # Puxando a linha da OS selecionada com segurança
         linha_os = df_exibicao[df_exibicao['OS'] == os_selecionada].iloc[0]
         
         st.info(f"""
@@ -211,3 +210,4 @@ else:
 st.markdown("---")
 st.subheader("📋 Relatório Sincronizado de Ordens de Serviço")
 
+if arquivo_upload is not None and not df_exibicao.empty:
