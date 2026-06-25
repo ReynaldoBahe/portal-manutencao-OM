@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import json
+from hud_visualizer import injetar_sinalizacao_tela
 import urllib.parse
 
 # 1. Configuração da Página (Layout Amplo e Corporativo)
@@ -154,6 +155,7 @@ if arquivo_upload is not None and not df_exibicao.empty:
             data_raw = df_filtrado_os['Data_Abertura'].values[0]
             data_abertura = pd.to_datetime(data_raw).strftime('%d/%m/%Y')
             
+           injetar_sinalizacao_tela(df_filtrado_os)
             st.info(f"""
             **📋 Ficha Técnica do Ativo**
             * **ID BIM:** `{id_bim}`
