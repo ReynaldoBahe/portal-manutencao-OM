@@ -97,10 +97,11 @@ with st.sidebar:
         st.warning("Aguardando upload da planilha...")
         st.metric(label="SLA de Atendimento (Meta: 95%)", value="-- %", delta="Sem dados")
 
-# 3. Layout de Tela: Área Central (Maquete 3D Panorâmica)
+# 3. Layout de Tela: Área Central (Maquete 3D Panorâmica do Speckle Oficial)
 st.title("Visualizador Operacional de Ativos 3D")
 
-url_maquete_3d = "https://spline.design"
+# URL Oficial extraída do iframe do Speckle enviado pelo usuário
+url_maquete_3d = "https://app.speckle.systems/projects/a649da7292/models/815af390c7?embedToken=d480d73248d4a1f2a9c206055431440674d81c7e3e#embed=%7B%22isEnabled%22%3Atrue%7D"
 st.components.v1.iframe(url_maquete_3d, height=1000)
 
 st.markdown("---")
@@ -115,11 +116,11 @@ with col4: st.metric(label="🔴 Fechado", value=contagem_status["Fechado"])
 
 st.markdown("---")
 
-# --- NOVO BLOCO: ARQUITETURA DO DIAGNÓSTICO INTELIGENTE POR IA ---
+# 5. Centro de Diagnóstico Avançado (IA Preditiva)
 st.subheader("🧠 Centro de Diagnóstico Avançado (IA Preditiva)")
 
 if arquivo_upload is not None and not df_exibicao.empty:
-    col_sel, col_diag = st.columns([1, 2])
+    col_sel, col_diag = st.columns(2)
     
     with col_sel:
         st.markdown("**🔎 Seleção de Ativo para Auditoria**")
@@ -129,7 +130,7 @@ if arquivo_upload is not None and not df_exibicao.empty:
         linha_os = df_exibicao[df_exibicao['OS'] == os_selecionada].iloc[0]
         
         st.info(f"""
-        **📋 Ficha Técnica do Ativo**
+        **📋 Ficha Técnico do Ativo**
         * **Setor:** {linha_os['Setor']}
         * **Status Atual:** {linha_os['Status']}
         * **Data de Abertura:** {linha_os['Data_Abertura'].strftime('%d/%m/%Y')}
@@ -140,7 +141,6 @@ if arquivo_upload is not None and not df_exibicao.empty:
     with col_diag:
         st.markdown("**⚡ Análise de Engenharia Operacional da IA**")
         
-        # Simulação de diagnóstico dinâmico baseado no status/setor selecionado
         if linha_os['Status'] == 'Aberta':
             st.markdown(f"""
             <div class="card-ia">
