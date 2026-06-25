@@ -98,16 +98,12 @@ with st.sidebar:
                 """, unsafe_allow_html=True)
                 
                 # --- ENGENHARIA DE CORES: CONSTRUÇÃO DOS MODIFICADORES DA URL ---
-                # Identifica os IDs reais de 32 caracteres para cada status
                 ids_abertos = df_exibicao[df_exibicao['Status'] == 'Aberta']['ID'].dropna().tolist()
-                ids_fechados = df_exibicao[df_exibicao['Status'] == 'Fechado']['ID'].dropna().tolist()
                 
-                # Cria a estrutura de filtros do Speckle via URL hash
                 opcoes_visualizador = {"ghostOthers": True}
                 if ids_abertos:
                     opcoes_visualizador["filter"] = {"objectIds": ids_abertos}
                 
-                # Transforma o dicionário em texto codificado para URL para interagir com o iframe
                 string_json = json.dumps(opcoes_visualizador)
                 url_modificadores = f"#embed={urllib.parse.quote(string_json)}"
             
@@ -135,7 +131,6 @@ with st.sidebar:
 # 3. Layout de Tela: Área Central (Maquete 3D Panorâmica do Speckle Dinâmica)
 st.title("Visualizador Operacional de Ativos 3D")
 
-# Junta a URL base do seu resort com os modificadores gerados dinamicamente pelos IDs da planilha
 url_final_speckle = f"{url_base_speckle}{url_modificadores}"
 st.components.v1.iframe(url_final_speckle, height=1000)
 
@@ -161,7 +156,7 @@ if arquivo_upload is not None and not df_exibicao.empty:
         st.markdown("**🔎 Seleção de Ativo para Auditoria**")
         os_selecionada = st.selectbox("Selecione a OS para análise da IA:", lista_os_selecao)
         
-        # Puxando a linha selecionada para simular o cruzamento de dados
+        # Obter linha selecionada
         linha_os = df_exibicao[df_exibicao['OS'] == os_selecionada].iloc[0]
         
         st.info(f"""
@@ -200,3 +195,13 @@ if arquivo_upload is not None and not df_exibicao.empty:
                 <hr>
                 <p><b>📈 Recomendação Preditiva:</b></p>
                 <ul>
+                    <li>Agendar inspeção termográfica preventiva em 90 dias para garantir a estabilidade do ativo.</li>
+                    <li>Registrar a conformidade dos componentes trocados no banco de dados do CMMS.</li>
+                </ul>
+                <small>🍃 <i>Status do Ativo: Estável | ID Identificado: {linha_os['ID'][:8]}...</i></small>
+            </div>
+            """, unsafe_allow_html=True)
+else:
+    st.info("Carregue a planilha na barra lateral para ativar o Centro de Diagnóstico Inteligente por IA.")
+
+st.markdown("---")
