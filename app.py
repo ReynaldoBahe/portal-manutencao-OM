@@ -141,18 +141,15 @@ if arquivo_upload is not None and not df_exibicao.empty:
         st.markdown("**🔎 Seleção de Ativo para Auditoria**")
         os_selecionada = st.selectbox("Selecione a OS para análise da IA:", lista_os_selecao)
         
-        # Filtro seguro focado na OS selecionada
         df_filtrado_os = df_exibicao[df_exibicao['OS'] == os_selecionada]
         
         if not df_filtrado_os.empty:
-            # Extração blindada e limpa sem indexadores complexos
             id_bim = str(df_filtrado_os['ID'].values[0])
             responsavel_tecnico = str(df_filtrado_os['Responsavel'].values[0])
             setor_ativo = str(df_filtrado_os['Setor'].values[0])
             status_ativo = str(df_filtrado_os['Status'].values[0])
             descricao_falha = str(df_filtrado_os['Descrição'].values[0])
             
-            # Formatação segura da data
             data_raw = df_filtrado_os['Data_Abertura'].values[0]
             data_abertura = pd.to_datetime(data_raw).strftime('%d/%m/%Y')
             
@@ -202,4 +199,8 @@ with col4: st.metric(label="🔴 Fechado", value=contagem_status["Fechado"])
 
 st.markdown("---")
 
-# 6. SEÇÃO DO RELATÓRIO COMPLETAMENTE DESTRAVADA E OBRIGATÓRIA
+# 6. SEÇÃO DO RELATÓRIO COMPLETAMENTE FORÇADA E LIBERADA
+st.subheader("📋 Relatório Sincronizado de Ordens de Serviço")
+
+# Força a exibição imediata do arquivo carregado, eliminando qualquer verificação oculta
+if arquivo_upload is not None:
