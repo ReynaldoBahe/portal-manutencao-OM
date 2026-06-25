@@ -141,6 +141,7 @@ if arquivo_upload is not None and not df_exibicao.empty:
         st.markdown("**🔎 Seleção de Ativo para Auditoria**")
         os_selecionada = st.selectbox("Selecione a OS para análise da IA:", lista_os_selecao)
         
+        # Filtro seguro focado na OS selecionada
         df_filtrado_os = df_exibicao[df_exibicao['OS'] == os_selecionada]
         
         if not df_filtrado_os.empty:
@@ -169,9 +170,9 @@ if arquivo_upload is not None and not df_exibicao.empty:
         
         if not df_filtrado_os.empty:
             if status_ativo == 'Aberta':
-                st.error(f"⚠️ DIAGNÓSTICO PRESCRITIVO: Risco de Parada Crítica\n\nAnálise Causa Raiz: Com base na descrição '{descricao_falha}' e no manual técnico, o sintoma aponta para fadiga por vibração excessiva nas prumadas de alimentação do Bloco B.\n\n🔧 Plano de Ação (Alocado para {responsavel_tecnico}):\n1. Isolar a válvula reguladora (Seção 4.2 do manual).\n2. Verificar microfissuras na junta flexível.\n3. Substituir anéis de vedação elastoméricos.")
+                st.error(f"⚠️ DIAGNÓSTICO PRESCRITIVO: Risco de Parada Crítica. Causa Raiz: Com base na descrição '{descricao_falha}', o sintoma aponta para fadiga por vibração excessiva nas prumadas de alimentação do Bloco B. Plano de Ação para {responsavel_tecnico}: 1. Isolar a válvula reguladora; 2. Verificar microfissuras; 3. Substituir anéis de vedação.")
             else:
-                st.success(f"✅ ANÁLISE COMPLEMENTAR: Ordem Encerrada\n\nAnálise de Fechamento: A OS executada por {responsavel_tecnico} referente a '{descricao_falha}' foi devidamente finalizada de acordo com as especificações.\n\n📈 Recomendação Preventiva:\n* Agendar inspeção termográfica preventiva em 90 dias.\n* Registrar a conformidade no banco do CMMS.")
+                st.success(f"✅ ANÁLISE COMPLEMENTAR: Ordem Encerrada. A OS executada por {responsavel_tecnico} referente a '{descricao_falha}' foi devidamente finalizada de acordo com as especificações técnicas do fabricante. Recomendação: Agendar inspeção preventiva em 90 dias.")
             
     # Análise de Desempenho Técnico
     st.markdown("---")
@@ -199,9 +200,10 @@ with col4: st.metric(label="🔴 Fechado", value=contagem_status["Fechado"])
 
 st.markdown("---")
 
-# 6. SEÇÃO DO RELATÓRIO COMPLETAMENTE DESTRAVADA, ALINHADA E OBRIGATÓRIA
+# 6. SEÇÃO DO RELATÓRIO COMPLETAMENTE DESTRAVADA E OBRIGATÓRIA
 st.subheader("📋 Relatório Sincronizado de Ordens de Serviço")
 
 if arquivo_upload is not None:
     st.dataframe(df_exibicao, use_container_width=True, height=300)
 else:
+    st.info("Faça o upload do arquivo CSV na barra lateral para listar as Ordens de Serviço.")
