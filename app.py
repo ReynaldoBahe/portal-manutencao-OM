@@ -1,5 +1,7 @@
 import streamlit as st
 import pandas as pd
+import json
+import urllib.parse
 
 # 1. Configuração da Página (Layout Amplo e Corporativo)
 st.set_page_config(
@@ -29,6 +31,9 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# Base da URL do seu modelo Speckle com o token
+url_base_speckle = "https://speckle.systems"
+
 # 2. Layout de Tela: Barra Lateral (Métricas Operacionais)
 with st.sidebar:
     st.title("Painel de Controle")
@@ -43,6 +48,7 @@ with st.sidebar:
     df_exibicao = pd.DataFrame()
     contagem_status = {"Aberta": 0, "Fechado": 0, "Em Atendimento": 0, "Pausada": 0}
     lista_os_selecao = ["Nenhuma OS selecionada"]
+    url_modificadores = ""
     
     if arquivo_upload is not None:
         try:
@@ -50,12 +56,12 @@ with st.sidebar:
             df_os = pd.read_csv(arquivo_upload)
             df_os.columns = df_os.columns.str.strip()
             
-            # Padronização e limpeza dos dados com o novo campo ID
+            # Padronização e limpeza dos dados com o campo ID de 32 caracteres
             df_os['Data_Abertura'] = pd.to_datetime(df_os['Data_Abertura'], errors='coerce')
             df_os['Status'] = df_os['Status'].astype(str).str.strip()
             df_os['Setor'] = df_os['Setor'].astype(str).str.strip()
             df_os['OS'] = df_os['OS'].astype(str).str.strip()
-            df_os['ID'] = df_os['ID'].astype(str).str.strip()  # Mapeamento do ID BIM
+            df_os['ID'] = df_os['ID'].astype(str).str.strip()
             
             # Base de cálculo estrita: Mês de Junho/2026
             df_mes = df_os[df_os['Data_Abertura'].dt.strftime('%Y-%m') == '2026-06']
@@ -88,10 +94,22 @@ with st.sidebar:
             if modo_cor:
                 st.markdown(f"""
                 <div class="legenda-item"><div class="quadrado-cor" style="background-color: #ff4b4b;"></div>🔴 Aberta (Manutenção Urgente)</div>
-                <div class="legenda-item"><div class="quadrado-cor" style="background-color: #0066cc;"></div>🔵 Em Atendimento</div>
-                <div class="legenda-item"><div class="quadrado-cor" style="background-color: #ffa500;"></div>🟡 Pausada</div>
                 <div class="legenda-item"><div class="quadrado-cor" style="background-color: #28a745;"></div>🟢 Fechado (Ativo em Conformidade)</div>
                 """, unsafe_allow_html=True)
+                
+                # --- ENGENHARIA DE CORES: CONSTRUÇÃO DOS MODIFICADORES DA URL ---
+                # Identifica os IDs reais de 32 caracteres para cada status
+                ids_abertos = df_exibicao[df_exibicao['Status'] == 'Aberta']['ID'].dropna().tolist()
+                ids_fechados = df_exibicao[df_exibicao['Status'] == 'Fechado']['ID'].dropna().tolist()
+                
+                # Cria a estrutura de filtros do Speckle via URL hash
+                opcoes_visualizador = {"ghostOthers": True}
+                if ids_abertos:
+                    opcoes_visualizador["filter"] = {"objectIds": ids_abertos}
+                
+                # Transforma o dicionário em texto codificado para URL para interagir com o iframe
+                string_json = json.dumps(opcoes_visualizador)
+                url_modificadores = f"#embed={urllib.parse.quote(string_json)}"
             
             st.markdown("---")
             st.subheader("Métricas de Manutenção")
@@ -114,11 +132,12 @@ with st.sidebar:
         st.warning("Aguardando upload da planilha...")
         st.metric(label="SLA de Atendimento (Meta: 95%)", value="-- %", delta="Sem dados")
 
-# 3. Layout de Tela: Área Central (Maquete 3D Panorâmica do Speckle)
+# 3. Layout de Tela: Área Central (Maquete 3D Panorâmica do Speckle Dinâmica)
 st.title("Visualizador Operacional de Ativos 3D")
 
-url_maquete_3d = "https://app.speckle.systems/projects/a649da7292/models/815af390c7?embedToken=2aaa49d6f30ad4db0d2844045f56d8ad0ee3bf7643"
-st.components.v1.iframe(url_maquete_3d, height=1000)
+# Junta a URL base do seu resort com os modificadores gerados dinamicamente pelos IDs da planilha
+url_final_speckle = f"{url_base_speckle}{url_modificadores}"
+st.components.v1.iframe(url_final_speckle, height=1000)
 
 st.markdown("---")
 
@@ -181,19 +200,3 @@ if arquivo_upload is not None and not df_exibicao.empty:
                 <hr>
                 <p><b>📈 Recomendação Preditiva:</b></p>
                 <ul>
-                    <li>Agendar inspeção termográfica preventiva em 90 dias para garantir a estabilidade do ativo.</li>
-                    <li>Registrar a conformidade dos componentes trocados no banco de dados do CMMS.</li>
-                </ul>
-                <small>🍃 <i>Status do Ativo: Estável | ID Identificado: {linha_os['ID'][:8]}...</i></small>
-            </div>
-            """, unsafe_allow_html=True)
-else:
-    st.info("Carregue a planilha na barra lateral para ativar o Centro de Diagnóstico Inteligente por IA.")
-
-st.markdown("---")
-st.subheader("📋 Relatório Sincronizado de Ordens de Serviço")
-
-if arquivo_upload is not None and not df_exibicao.empty:
-    st.dataframe(df_exibicao, use_container_width=True, height=300)
-else:
-    st.info("Faça o upload do arquivo CSV na barra lateral para listar as Ordens de Serviço.")
