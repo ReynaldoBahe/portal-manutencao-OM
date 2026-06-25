@@ -80,7 +80,8 @@ with st.sidebar:
                 df_exibicao = df_exibicao[df_exibicao['Setor'] == setor_selecionado]
             if status_selecionado != "Todos":
                 df_exibicao = df_exibicao[df_exibicao['Status'] == status_selecionado]
-                            if criticidade_selecionada != "Todos":
+
+            if criticidade_selecionada != "Todos":
                 df_exibicao = df_exibicao[df_exibicao['Criticidade'] == criticidade_selecionada]
 
             
