@@ -97,11 +97,11 @@ with st.sidebar:
         st.warning("Aguardando upload da planilha...")
         st.metric(label="SLA de Atendimento (Meta: 95%)", value="-- %", delta="Sem dados")
 
-# 3. Layout de Tela: Área Central (Maquete 3D Panorâmica do Speckle Oficial)
+# 3. Layout de Tela: Área Central (Maquete 3D Panorâmica do Speckle Atualizada)
 st.title("Visualizador Operacional de Ativos 3D")
 
-# URL Oficial extraída do iframe do Speckle enviado pelo usuário
-url_maquete_3d = "https://app.speckle.systems/projects/a649da7292/models/815af390c7?embedToken=d480d73248d4a1f2a9c206055431440674d81c7e3e#embed=%7B%22isEnabled%22%3Atrue%7D"
+# URL atualizada com o novo embedToken enviado pelo usuário
+url_maquete_3d = "https://app.speckle.systems/projects/a649da7292/models/815af390c7?embedToken=2aaa49d6f30ad4db0d2844045f56d8ad0ee3bf7643"
 st.components.v1.iframe(url_maquete_3d, height=1000)
 
 st.markdown("---")
@@ -130,7 +130,7 @@ if arquivo_upload is not None and not df_exibicao.empty:
         linha_os = df_exibicao[df_exibicao['OS'] == os_selecionada].iloc[0]
         
         st.info(f"""
-        **📋 Ficha Técnico do Ativo**
+        **📋 Ficha Técnica do Ativo**
         * **Setor:** {linha_os['Setor']}
         * **Status Atual:** {linha_os['Status']}
         * **Data de Abertura:** {linha_os['Data_Abertura'].strftime('%d/%m/%Y')}
