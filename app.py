@@ -11,7 +11,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Estilização CSS: Retornando para uma altura robusta de 750px para valorizar a maquete
+# Estilização CSS: Altura calibrada para 750px para valorizar a maquete
 st.markdown("""
     <style>
     .block-container { padding-top: 1.5rem; padding-bottom: 1rem; }
@@ -141,7 +141,7 @@ if arquivo_upload is not None and not df_exibicao.empty:
         st.markdown("**🔎 Seleção de Ativo para Auditoria**")
         os_selecionada = st.selectbox("Selecione a OS para análise da IA:", lista_os_selecao)
         
-        # --- CORREÇÃO DEFINITIVA DO ILOC COM OS COLCHETES ---
+        # Correção segura para extrair a primeira linha do filtro
         linha_os = df_exibicao[df_exibicao['OS'] == os_selecionada].iloc[0]
         
         st.info(f"""
@@ -184,7 +184,7 @@ if arquivo_upload is not None and not df_exibicao.empty:
             Status do Ativo: Estável | ID Identificado: {linha_os['ID'][:8]}...
             """)
             
-    # Análise de Desempenho Técnico
+    # Análise de Desempenho Técnico (Indentação Rigorosa Aplicada)
     st.markdown("---")
     st.subheader("👥 Análise de Produtividade da Equipe Técnica")
     
@@ -193,7 +193,7 @@ if arquivo_upload is not None and not df_exibicao.empty:
         produtividade = df_fechadas_resp['Responsavel'].value_counts()
         st.bar_chart(produtividade)
     else:
-        st.info("Nenhuma ordem fechada encontrada no filtro selecionado.")
+        st.info("Nenhuma ordem fechada encontrada no filtro selecionado para montar o gráfico de barras.")
         
 else:
     st.info("Carregue a planilha na barra lateral para ativar o Centro de Diagnóstico Inteligente por IA.")
@@ -210,7 +210,6 @@ with col4: st.metric(label="🔴 Fechado", value=contagem_status["Fechado"])
 
 st.markdown("---")
 
-# 6. SEÇÃO DO RELATÓRIO CORRIGIDA E LIBERADA
+# 6. SEÇÃO DO RELATÓRIO COMPLETAMENTE LIBERADA E CORRIGIDA
 st.subheader("📋 Relatório Sincronizado de Ordens de Serviço")
 
-if arquivo_upload is not None and not df_exibicao.empty:
