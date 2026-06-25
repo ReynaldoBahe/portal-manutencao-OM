@@ -184,7 +184,7 @@ if arquivo_upload is not None and not df_exibicao.empty:
             Status do Ativo: Estável | ID Identificado: {linha_os['ID'][:8]}...
             """)
             
-    # Análise de Desempenho Técnico (Indentação Rigorosa Aplicada)
+    # Análise de Desempenho Técnico 
     st.markdown("---")
     st.subheader("👥 Análise de Produtividade da Equipe Técnica")
     
@@ -210,6 +210,6 @@ with col4: st.metric(label="🔴 Fechado", value=contagem_status["Fechado"])
 
 st.markdown("---")
 
-# 6. SEÇÃO DO RELATÓRIO COMPLETAMENTE LIBERADA E CORRIGIDA
+# 6. SEÇÃO DO RELATÓRIO TOTALMENTE DESTRAVADA E OBRIGATÓRIA
 st.subheader("📋 Relatório Sincronizado de Ordens de Serviço")
 
