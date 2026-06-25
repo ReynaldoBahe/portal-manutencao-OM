@@ -27,8 +27,9 @@ with st.sidebar:
     
     st.markdown("---")
     
-    # Criamos os placeholders das variáveis para evitar erros de inicialização
+    # Placeholders para evitar erros de inicialização
     df_exibicao = pd.DataFrame()
+    contagem_status = {"Aberta": 0, "Fechado": 0, "Em Atendimento": 0, "Pausada": 0}
     
     if arquivo_upload is not None:
         try:
@@ -63,6 +64,10 @@ with st.sidebar:
             if status_selecionado != "Todos":
                 df_exibicao = df_exibicao[df_exibicao['Status'] == status_selecionado]
             
+            # Mapeamento e contagem estrita dos status solicitados no universo filtrado
+            for status_chave in contagem_status.keys():
+                contagem_status[status_chave] = len(df_exibicao[df_exibicao['Status'] == status_chave])
+            
             st.markdown("---")
             st.subheader("Métricas de Manutenção")
             
@@ -89,17 +94,32 @@ with st.sidebar:
         st.warning("Aguardando upload da planilha...")
         st.metric(label="SLA de Atendimento (Meta: 95%)", value="-- %", delta="Sem dados")
 
-# 4. Layout de Tela: Área Central (Maquete 3D Panorâmica e Tabela)
+# 4. Layout de Tela: Área Central (Maquete 3D Panorâmica)
 st.title("Visualizador Operacional de Ativos 3D")
 
-# Link atualizado e funcional da maquete 3D para evitar a tela cinza de erro
+# Link da maquete 3D
 url_maquete_3d = "https://spline.design"
 st.components.v1.iframe(url_maquete_3d, height=1000)
 
 st.markdown("---")
+
+# --- NOVO BLOCO: CARTÕES DE ESTATÍSTICA DE STATUS (KPIs) ---
+st.subheader("📊 Volumetria das Ordens de Serviço")
+col1, col2, col3, col4 = st.columns(4)
+
+with col1:
+    st.metric(label="🟢 Aberta", value=contagem_status["Aberta"])
+with col2:
+    st.metric(label="🔵 Em Atendimento", value=contagem_status["Em Atendimento"])
+with col3:
+    st.metric(label="🟡 Pausada", value=contagem_status["Pausada"])
+with col4:
+    st.metric(label="🔴 Fechado", value=contagem_status["Fechado"])
+
+st.markdown("---")
 st.subheader("📋 Relatório Sincronizado de Ordens de Serviço")
 
-# Exibição da tabela filtrada dinamicamente logo abaixo da maquete
+# Exibição da tabela filtrada dinamicamente logo abaixo dos cartões
 if arquivo_upload is not None and not df_exibicao.empty:
     st.dataframe(df_exibicao, use_container_width=True, height=300)
 else:
