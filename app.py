@@ -141,16 +141,17 @@ if arquivo_upload is not None and not df_exibicao.empty:
         st.markdown("**🔎 Seleção de Ativo para Auditoria**")
         os_selecionada = st.selectbox("Selecione a OS para análise da IA:", lista_os_selecao)
         
-        # --- EXTRAÇÃO SEGURA E BLINDADA SEM USAR ILOC SOLTO ---
+        # Filtro seguro focado na OS selecionada
         df_filtrado_os = df_exibicao[df_exibicao['OS'] == os_selecionada]
         
         if not df_filtrado_os.empty:
-            id_bim = df_filtrado_os['ID'].values[0]
-            responsabel_tecnico = df_filtrado_os['Responsavel'].values[0]
-            setor_ativo = df_filtrado_os['Setor'].values[0]
-            status_ativo = df_filtrado_os['Status'].values[0]
+            # EXTRAÇÃO BLINDADA EXTRAINDO APENAS O TEXTO PURO (EVITA LISTAS)
+            id_bim = str(df_filtrado_os['ID'].values[0])
+            responsabel_tecnico = str(df_filtrado_os['Responsavel'].values[0])
+            setor_ativo = str(df_filtrado_os['Setor'].values[0])
+            status_ativo = str(df_filtrado_os['Status'].values[0])
             data_abertura = pd.to_datetime(df_filtrado_os['Data_Abertura'].values[0]).strftime('%d/%m/%Y')
-            descricao_falha = df_filtrado_os['Descrição'].values[0]
+            descricao_falha = str(df_filtrado_os['Descrição'].values[0])
             
             st.info(f"""
             **📋 Ficha Técnica do Ativo**
@@ -207,6 +208,3 @@ if arquivo_upload is not None and not df_exibicao.empty:
 else:
     st.info("Carregue a planilha na barra lateral para ativar o Centro de Diagnóstico Inteligente por IA.")
 
-st.markdown("---")
-
-# 5. VOLUMETRIA POSICIONADA LOGO ACIMA DA PLANILHA
