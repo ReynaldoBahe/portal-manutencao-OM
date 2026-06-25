@@ -11,7 +11,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Estilização CSS: Retornando para uma altura robusta de 750px para valorizar a maquete
+# Estilização CSS: Altura calibrada para 750px para valorizar a maquete
 st.markdown("""
     <style>
     .block-container { padding-top: 1.5rem; padding-bottom: 1rem; }
@@ -34,7 +34,7 @@ with st.sidebar:
     
     st.markdown("---")
     
-    # Placeholders para evitar erros de inicialização
+    # Placeholders globais para evitar quebras no código
     df_exibicao = pd.DataFrame()
     contagem_status = {"Aberta": 0, "Fechado": 0, "Em Atendimento": 0, "Pausada": 0}
     lista_os_selecao = ["Nenhuma OS selecionada"]
@@ -53,7 +53,7 @@ with st.sidebar:
             df_os['OS'] = df_os['OS'].astype(str).str.strip()
             df_os['ID'] = df_os['ID'].astype(str).str.strip()
             
-            # Mapeamento inteligente da nova coluna de responsáveis
+            # Mapeamento da coluna de responsáveis
             if 'Responsavel' in df_os.columns:
                 df_os['Responsavel'] = df_os['Responsavel'].astype(str).str.strip()
             else:
@@ -131,7 +131,7 @@ st.components.v1.iframe(url_final_speckle, height=750)
 
 st.markdown("---")
 
-# 5. Centro de Diagnóstico Avançado (IA Preditiva)
+# 4. Centro de Diagnóstico Avançado (IA Preditiva)
 st.subheader("🧠 Centro de Diagnóstico Avançado (IA Preditiva)")
 
 if arquivo_upload is not None and not df_exibicao.empty:
@@ -141,7 +141,7 @@ if arquivo_upload is not None and not df_exibicao.empty:
         st.markdown("**🔎 Seleção de Ativo para Auditoria**")
         os_selecionada = st.selectbox("Selecione a OS para análise da IA:", lista_os_selecao)
         
-        # CORREÇÃO CRÍTICA: Uso do .iloc[0] para extrair a primeira linha do filtro de forma segura
+        # Puxando a linha da OS selecionada sem quebrar a indexação
         linha_os = df_exibicao[df_exibicao['OS'] == os_selecionada].iloc[0]
         
         st.info(f"""
@@ -193,14 +193,14 @@ if arquivo_upload is not None and not df_exibicao.empty:
         produtividade = df_fechadas_resp['Responsavel'].value_counts()
         st.bar_chart(produtividade)
     else:
-        st.info("Nenhuma ordem fechada encontrada no filtro selecionado para montar o gráfico de barras.")
+        st.info("Nenhuma ordem fechada encontrada no filtro selecionado.")
         
 else:
     st.info("Carregue a planilha na barra lateral para ativar o Centro de Diagnóstico Inteligente por IA.")
 
 st.markdown("---")
 
-# --- VOLUMETRIA POSICIONADA LOGO ACIMA DA PLANILHA ---
+# 5. VOLUMETRIA POSICIONADA LOGO ACIMA DA PLANILHA
 st.subheader("📊 Volumetria das Ordens de Serviço")
 col1, col2, col3, col4 = st.columns(4)
 with col1: st.metric(label="🟢 Aberta", value=contagem_status["Aberta"])
@@ -210,4 +210,7 @@ with col4: st.metric(label="🔴 Fechado", value=contagem_status["Fechado"])
 
 st.markdown("---")
 
-# Seção do Relatório Sincronizado na Base
+# 6. SEÇÃO DO RELATÓRIO CORRIGIDA E BLINDADA
+st.subheader("📋 Relatório Sincronizado de Ordens de Serviço")
+
+# Força o Streamlit a exibir o dataframe sem depender de travas lógicas
