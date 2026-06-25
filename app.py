@@ -32,7 +32,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Base da URL do seu modelo Speckle com o token
-url_base_speckle = "https://app.speckle.systems/projects/a649da7292/models/815af390c7?embedToken=2aaa49d6f30ad4db0d2844045f56d8ad0ee3bf7643"
+url_base_speckle = "https://speckle.systems"
 
 # 2. Layout de Tela: Barra Lateral (Métricas Operacionais)
 with st.sidebar:
@@ -56,12 +56,18 @@ with st.sidebar:
             df_os = pd.read_csv(arquivo_upload)
             df_os.columns = df_os.columns.str.strip()
             
-            # Padronização e limpeza dos dados com o campo ID de 32 caracteres
+            # Padronização e limpeza dos dados
             df_os['Data_Abertura'] = pd.to_datetime(df_os['Data_Abertura'], errors='coerce')
             df_os['Status'] = df_os['Status'].astype(str).str.strip()
             df_os['Setor'] = df_os['Setor'].astype(str).str.strip()
             df_os['OS'] = df_os['OS'].astype(str).str.strip()
             df_os['ID'] = df_os['ID'].astype(str).str.strip()
+            
+            # Mapeamento inteligente da nova coluna de responsáveis
+            if 'Responsavel' in df_os.columns:
+                df_os['Responsavel'] = df_os['Responsavel'].astype(str).str.strip()
+            else:
+                df_os['Responsavel'] = "Não Atribuído"
             
             # Base de cálculo estrita: Mês de Junho/2026
             df_mes = df_os[df_os['Data_Abertura'].dt.strftime('%Y-%m') == '2026-06']
@@ -97,9 +103,8 @@ with st.sidebar:
                 <div class="legenda-item"><div class="quadrado-cor" style="background-color: #28a745;"></div>🟢 Fechado (Ativo em Conformidade)</div>
                 """, unsafe_allow_html=True)
                 
-                # --- ENGENHARIA DE CORES: CONSTRUÇÃO DOS MODIFICADORES DA URL ---
+                # Engenharia de Isolamento de IDs no Speckle
                 ids_abertos = df_exibicao[df_exibicao['Status'] == 'Aberta']['ID'].dropna().tolist()
-                
                 opcoes_visualizador = {"ghostOthers": True}
                 if ids_abertos:
                     opcoes_visualizador["filter"] = {"objectIds": ids_abertos}
@@ -156,12 +161,12 @@ if arquivo_upload is not None and not df_exibicao.empty:
         st.markdown("**🔎 Seleção de Ativo para Auditoria**")
         os_selecionada = st.selectbox("Selecione a OS para análise da IA:", lista_os_selecao)
         
-        # Obter linha selecionada
         linha_os = df_exibicao[df_exibicao['OS'] == os_selecionada].iloc[0]
         
         st.info(f"""
         **📋 Ficha Técnica do Ativo**
         * **ID BIM:** `{linha_os['ID']}`
+        * **Responsável Técnico:** {linha_os['Responsavel']}
         * **Setor:** {linha_os['Setor']}
         * **Status Atual:** {linha_os['Status']}
         * **Data de Abertura:** {linha_os['Data_Abertura'].strftime('%d/%m/%Y')}
@@ -178,7 +183,7 @@ if arquivo_upload is not None and not df_exibicao.empty:
                 <h4>⚠️ DIAGNÓSTICO PRESCRITIVO: Risco de Parada Crítica</h4>
                 <p><b>Análise Causa Raiz:</b> Com base na descrição <i>"{linha_os['Descrição']}"</i> e no cruzamento com o manual técnico, o sintoma apresentado aponta para fadiga por vibração excessiva nas prumadas de alimentação do Bloco B.</p>
                 <hr>
-                <p><b>🔧 Direcionamento e Plano de Ação para Campo:</b></p>
+                <p><b>🔧 Direcionamento e Plano de Ação para Campo (Alocado para: {linha_os['Responsavel']}):</b></p>
                 <ol>
                     <li>Isolar a válvula reguladora de pressão hidráulica conforme Seção 4.2 do manual.</li>
                     <li>Verificar se há microfissuras na junta de expansão flexível.</li>
@@ -191,17 +196,10 @@ if arquivo_upload is not None and not df_exibicao.empty:
             st.markdown(f"""
             <div class="card-ia" style="background-color: #f6fff6; border-left: 5px solid #28a745;">
                 <h4>✅ ANÁLISE COMPLEMENTAR: Ordem Encerrada</h4>
-                <p><b>Análise de Fechamento:</b> A OS referente a <i>"{linha_os['Descrição']}"</i> foi devidamente finalizada. O histórico confirma que a intervenção seguiu os parâmetros padrão especificados pelo fabricante no manual técnico.</p>
+                <p><b>Análise de Fechamento:</b> A OS executada por <b>{linha_os['Responsavel']}</b> referente a <i>"{linha_os['Descrição']}"</i> foi devidamente finalizada de acordo com as especificações técnicas do fabricante.</p>
                 <hr>
                 <p><b>📈 Recomendação Preditiva:</b></p>
                 <ul>
                     <li>Agendar inspeção termográfica preventiva em 90 dias para garantir a estabilidade do ativo.</li>
                     <li>Registrar a conformidade dos componentes trocados no banco de dados do CMMS.</li>
                 </ul>
-                <small>🍃 <i>Status do Ativo: Estável | ID Identificado: {linha_os['ID'][:8]}...</i></small>
-            </div>
-            """, unsafe_allow_html=True)
-else:
-    st.info("Carregue a planilha na barra lateral para ativar o Centro de Diagnóstico Inteligente por IA.")
-
-st.markdown("---")
