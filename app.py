@@ -207,7 +207,7 @@ if arquivo_upload is not None and not df_exibicao.empty:
 else:
     st.info("Carregue a planilha na barra lateral para ativar o Centro de Diagnóstico Inteligente por IA.")
 
+# --- SEÇÃO DO RELATÓRIO CORRIGIDA COM INDENTAÇÃO PRECISA ---
 st.markdown("---")
 st.subheader("📋 Relatório Sincronizado de Ordens de Serviço")
 
-if arquivo_upload is not None and not df_exibicao.empty:
