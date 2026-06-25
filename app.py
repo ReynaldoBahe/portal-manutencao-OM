@@ -117,7 +117,7 @@ with st.sidebar:
 # 3. Layout de Tela: Área Central (Maquete 3D Panorâmica do Speckle)
 st.title("Visualizador Operacional de Ativos 3D")
 
-url_maquete_3d = "https://speckle.systems"
+url_maquete_3d = "https://app.speckle.systems/projects/a649da7292/models/815af390c7?embedToken=2aaa49d6f30ad4db0d2844045f56d8ad0ee3bf7643"
 st.components.v1.iframe(url_maquete_3d, height=1000)
 
 st.markdown("---")
