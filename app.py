@@ -219,14 +219,14 @@ if arquivo_upload is not None and not df_exibicao.empty:
                 st.markdown("---")
         df_fechadas_resp = df_filtrado_os[df_filtrado_os['Status'] == 'Fechado']
         if not df_fechadas_resp.empty:
-        produtividade = df_fechadas_resp['Responsavel'].value_counts().reset_index()
-        produtividade.columns = ['Responsável', 'Quantidade']
-        import altair as alt
-        chart = alt.Chart(produtividade).mark_bar(color='#1f77b4').encode(
+            produtividade = df_fechadas_resp['Responsavel'].value_counts().reset_index()
+            produtividade.columns = ['Responsável', 'Quantidade']
+            import altair as alt
+            chart = alt.Chart(produtividade).mark_bar(color='#1f77b4').encode(
             x=alt.X('Responsável:N', sort='-y', title='Responsável'),
             y=alt.Y('Quantidade:Q', title='Ordens Fechadas')
-        )
-        st.altair_chart(chart, use_container_width=True)
+            )
+            st.altair_chart(chart, use_container_width=True)
 
         else:
             st.info("Nenhuma ordem fechada encontrada no filtro selecionado para montar o gráfico de barras.")
