@@ -215,18 +215,17 @@ if arquivo_upload is not None and not df_exibicao.empty:
             else:
                 st.success(f"✅ ANÁLISE COMPLEMENTAR: Ordem Encerrada. A OS executada por {responsavel_tecnico} referente a '{descricao_falha}' foi devidamente finalizada de acordo com as especificações técnicas do fabricante. Recomendação: Agendar inspeção preventiva em 90 dias.")
             
-    # Análise de Desempenho Técnico
-    st.markdown("---")
-    st.subheader("👥 Análise de Produtividade da Equipe Técnica")
-    
-    df_fechadas_resp = df_mes[df_mes['Status'] == 'Fechado']
-    if not df_fechadas_resp.empty:
-        produtividade = df_fechadas_resp['Responsavel'].value_counts()
-        st.bar_chart(produtividade)
-
-    else:
-        st.info("Nenhuma ordem fechada encontrada no filtro selecionado para montar o gráfico de barras.")
+                # Análise de Desempenho Técnico
+                st.markdown("---")
+                st.subheader("📊 Análise de Produtividade da Equipe Técnica")
         
+                df_fechadas_resp = df_mes[df_mes['Status'] == 'Fechado']
+                if not df_fechadas_resp.empty:
+            produtividade = df_fechadas_resp['Responsavel'].value_counts()
+            st.bar_chart(produtividade)
+                else:
+            st.info("Nenhuma ordem fechada encontrada no filtro selecionado para montar o gráfico de barras.")
+
 else:
     st.info("Carregue a planilha na barra lateral para ativar o Centro de Diagnóstico Inteligente por IA.")
 
