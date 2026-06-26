@@ -94,16 +94,14 @@ with st.sidebar:
             import datetime
             hoje = datetime.date(2026, 6, 25)
             
-            # Converte a data de forma segura e calcula a diferença
-                        df_exibicao['Data_DT'] = pd.to_datetime(df_exibicao['Data_Abertura'], errors='coerce').dt.date
-                        df_exibicao['Dias_Aberto'] = df_exibicao.apply(
+                        # Converte a data de forma segura e calcula a diferença
+            df_exibicao['Data_DT'] = pd.to_datetime(df_exibicao['Data_Abertura'], errors='coerce').dt.date
+            df_exibicao['Dias_Aberto'] = df_exibicao.apply(
                 lambda r: (hoje - r['Data_DT']).days if str(r['Status']).strip() == 'Aberta' 
                 and (pd.isna(r['Data_Fechamento']) or str(r['Data_Fechamento']).strip() == '') 
                 and not pd.isna(r['Data_DT']) else 0,
                 axis=1
             )
-
-
             
             # Aplica o filtro de tempo escolhido na barra lateral
             if filtro_dias == "0 a 3 dias":
