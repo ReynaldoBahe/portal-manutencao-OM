@@ -219,7 +219,7 @@ if arquivo_upload is not None and not df_exibicao.empty:
                 st.markdown("---")
                 st.subheader("📊 Análise de Produtividade da Equipe Técnica")
         
-                df_fechadas_resp = df_mes[df_mes['Status'] == 'Fechado']
+                df_filtrado_os[df_filtrado_os['Status'] == 'Fechado']
                 if not df_fechadas_resp.empty:
                     produtividade = df_fechadas_resp['Responsavel'].value_counts()
                     st.bar_chart(produtividade)
