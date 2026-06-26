@@ -217,12 +217,12 @@ if arquivo_upload is not None and not df_exibicao.empty:
             
                 # Análise de Desempenho Técnico
                 st.markdown("---")
-                    df_fechadas_resp = df_filtrado_os[df_filtrado_os['Status'] == 'Fechado']
-    if not df_fechadas_resp.empty:
-        produtividade = df_fechadas_resp['Responsavel'].value_counts()
-        st.bar_chart(produtividade)
-    else:
-        st.info("Nenhuma ordem fechada encontrada no filtro selecionado para montar o gráfico de barras.")
+        df_fechadas_resp = df_filtrado_os[df_filtrado_os['Status'] == 'Fechado']
+        if not df_fechadas_resp.empty:
+            produtividade = df_fechadas_resp['Responsavel'].value_counts()
+            st.bar_chart(produtividade)
+        else:
+            st.info("Nenhuma ordem fechada encontrada no filtro selecionado para montar o gráfico de barras.")
 
 else:
     st.info("Carregue a planilha na barra lateral para ativar o Centro de Diagnóstico Inteligente por IA.")
