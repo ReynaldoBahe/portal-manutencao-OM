@@ -75,6 +75,12 @@ with st.sidebar:
     "Filtrar por Criticidade:",
     ["Todos", "Alta", "Média", "Baixa"]
 )
+            st.sidebar.markdown("---")
+filtro_dias = st.sidebar.selectbox(
+    "Filtrar por Tempo Aberta:",
+    ["Todos", "0 a 3 dias", "4 a 7 dias", "8 a 15 dias", "Mais de 16 dias"]
+)
+
             df_exibicao = df_mes.copy()
             if setor_selecionado != "Todos":
                 df_exibicao = df_exibicao[df_exibicao['Setor'] == setor_selecionado]
@@ -83,6 +89,27 @@ with st.sidebar:
 
             if criticidade_selecionada != "Todos":
                 df_exibicao = df_exibicao[df_exibicao['Criticidade'] == criticidade_selecionada]
+
+            # Cálculo de Aging (Dias em Aberto) baseado na data atual
+            import datetime
+            hoje = datetime.date(2026, 6, 25)
+            
+            # Converte a data de forma segura e calcula a diferença
+            df_exibicao['Data_DT'] = pd.to_datetime(df_exibicao['Data_Abertura'], format='%d/%m/%Y', errors='coerce').dt.date
+            df_exibicao['Dias_Aberto'] = df_exibicao.apply(
+                lambda r: (hoje - r['Data_DT']).days if r['Status'] == 'Aberta' and not pd.isna(r['Data_DT']) else 0,
+                axis=1
+            )
+            
+            # Aplica o filtro de tempo escolhido na barra lateral
+            if filtro_dias == "0 a 3 dias":
+                df_exibicao = df_exibicao[(df_exibicao['Dias_Aberto'] >= 0) & (df_exibicao['Dias_Aberto'] <= 3)]
+            elif filtro_dias == "4 a 7 dias":
+                df_exibicao = df_exibicao[(df_exibicao['Dias_Aberto'] >= 4) & (df_exibicao['Dias_Aberto'] <= 7)]
+            elif filtro_dias == "8 a 15 dias":
+                df_exibicao = df_exibicao[(df_exibicao['Dias_Aberto'] >= 8) & (df_exibicao['Dias_Aberto'] <= 15)]
+            elif filtro_dias == "Mais de 16 dias":
+                df_exibicao = df_exibicao[df_exibicao['Dias_Aberto'] >= 16]
 
             
             # Lista de OS para o seletor da IA
