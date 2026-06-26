@@ -221,8 +221,8 @@ if arquivo_upload is not None and not df_exibicao.empty:
         
                 df_fechadas_resp = df_mes[df_mes['Status'] == 'Fechado']
                 if not df_fechadas_resp.empty:
-            produtividade = df_fechadas_resp['Responsavel'].value_counts()
-            st.bar_chart(produtividade)
+                produtividade = df_fechadas_resp['Responsavel'].value_counts()
+                st.bar_chart(produtividade)
                 else:
             st.info("Nenhuma ordem fechada encontrada no filtro selecionado para montar o gráfico de barras.")
 
