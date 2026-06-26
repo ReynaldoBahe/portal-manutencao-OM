@@ -76,10 +76,10 @@ with st.sidebar:
     ["Todos", "Alta", "Média", "Baixa"]
 )
             st.sidebar.markdown("---")
-filtro_dias = st.sidebar.selectbox(
-    "Filtrar por Tempo Aberta:",
-    ["Todos", "0 a 3 dias", "4 a 7 dias", "8 a 15 dias", "Mais de 16 dias"]
-)
+            filtro_dias = st.sidebar.selectbox(
+            "Filtrar por Tempo Aberta:",
+            ["Todos", "0 a 3 dias", "4 a 7 dias", "8 a 15 dias", "Mais de 16 dias"]
+            )
 
             df_exibicao = df_mes.copy()
             if setor_selecionado != "Todos":
