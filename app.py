@@ -1,210 +1,132 @@
 import streamlit as st
-import pandas as pd
-import json
-from hud_visualizer import injetar_sinalizacao_tela
-import urllib.parse
 
-# 1. Configuração da Página (Layout Amplo e Corporativo)
-st.set_page_config(
-    page_title="RB Consultoria - Gestão de Ativos",
-    page_icon="🏢",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+# 1. Configuração da página (O modo Wide permite a expansão das páginas internas)
+st.set_page_config(page_title="RB Consultoria", page_icon="🏢", layout="wide")
 
-# Estilização CSS: Altura calibrada para 750px para valorizar a maquete
-st.markdown("""
-    <style>
-    .block-container { padding-top: 1.5rem; padding-bottom: 1rem; }
-    iframe { width: 100% !important; height: 750px !important; border-radius: 12px; }
-    .legenda-item { display: flex; align-items: center; margin-bottom: 6px; font-size: 14px; }
-    .quadrado-cor { width: 16px; height: 16px; border-radius: 4px; margin-right: 10px; }
-    </style>
-""", unsafe_allow_html=True)
+# 2. Inicializa as variáveis de controle de login globais
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+if "cliente_ativo" not in st.session_state:
+    st.session_state.cliente_ativo = ""
 
-# Base da URL do seu modelo Speckle com o token
-url_base_speckle = "https://speckle.systems"
+# 3. Definição das Páginas do Sistema utilizando st.Page
+pagina_login = st.Page("app.py", title="Acesso ao Sistema", icon="🔒", default=True)
+pagina_home = st.Page("pages/01_Home.py", title="Home", icon="🏠")
+pagina_engenharia = st.Page("pages/01_Modulos_de_Engenharia.py", title="Módulos de Engenharia", icon="⚙️")
+pagina_manutencao = st.Page("pages/02_Gestao_da_Manutencao.py", title="Gestão da Manutenção", icon="🛠️")
+pagina_indicadores = st.Page("pages/03_Indicadores_de_Tempo.py", title="Indicadores de Tempo", icon="📊")
+pagina_telemetria = st.Page("pages/04_Telemetria_em_Tempo_Real.py", title="Telemetria em Tempo Real", icon="⚡")
 
-# 2. Layout de Tela: Barra Lateral (Métricas Operacionais)
-with st.sidebar:
-    st.title("Painel de Controle")
-    st.markdown("---")
+# Gerenciador de Navegação Dinâmica (Esconde o menu lateral antes do login)
+if st.session_state.logged_in:
+    paginas_disponiveis = [pagina_home, pagina_engenharia, pagina_manutencao, pagina_indicadores, pagina_telemetria]
+else:
+    paginas_disponiveis = [pagina_login]
+
+pg = st.navigation(paginas_disponiveis)
+
+# =========================================================================
+# LÓGICA DE RENDERIZAÇÃO DAS TELAS
+# =========================================================================
+if not st.session_state.logged_in:
     
-    # Componente de Upload do arquivo CSV gerado pelo CMMS
-    arquivo_upload = st.file_uploader("Carregar Planilha CMMS (.csv)", type=["csv"])
-    
-    st.markdown("---")
-    
-    # Placeholders globais para evitar quebras no código
-    df_exibicao = pd.DataFrame()
-    contagem_status = {"Aberta": 0, "Fechado": 0, "Em Atendimento": 0, "Pausada": 0}
-    lista_os_selecao = ["Nenhuma OS selecionada"]
-    url_modificadores = ""
-    
-    if arquivo_upload is not None:
-        try:
-            # Lendo a planilha carregada pelo usuário
-            df_os = pd.read_csv(arquivo_upload)
-            df_os.columns = df_os.columns.str.strip()
-            
-            # Padronização e limpeza dos dados
-            df_os['Data_Abertura'] = pd.to_datetime(df_os['Data_Abertura'], errors='coerce')
-            df_os['Status'] = df_os['Status'].astype(str).str.strip()
-            df_os['Setor'] = df_os['Setor'].astype(str).str.strip()
-            df_os['OS'] = df_os['OS'].astype(str).str.strip()
-            df_os['ID'] = df_os['ID'].astype(str).str.strip()
-            
-            # Mapeamento da coluna de responsáveis
-            if 'Responsavel' in df_os.columns:
-                df_os['Responsavel'] = df_os['Responsavel'].astype(str).str.strip()
-            else:
-                df_os['Responsavel'] = "Não Atribuído"
-            
-            # Base de cálculo estrita: Mês de Junho/2026
-            df_mes = df_os[df_os['Data_Abertura'].dt.strftime('%Y-%m') == '2026-06']
-            
-            st.subheader("Filtros de Visão")
-            lista_setores = ["Todos"] + sorted(list(df_mes['Setor'].unique()))
-            setor_selecionado = st.selectbox("Filtrar por Setor:", lista_setores)
-            
-            lista_status = ["Todos"] + sorted(list(df_mes['Status'].unique()))
-            status_selecionado = st.selectbox("Filtrar por Status:", lista_status)
-            
-            # Aplicando os filtros na tabela de exibição
-            criticidade_selecionada = st.sidebar.selectbox(
-                "Filtrar por Criticidade:",
-                ["Todos", "Alta", "Média", "Baixa"]
-            )
-            st.sidebar.markdown("---")
-            filtro_dias = st.sidebar.selectbox(
-                "Filtrar por Tempo Aberta:",
-                ["Todos", "0 a 3 dias", "4 a 7 dias", "8 a 15 dias", "Mais de 16 dias"]
-            )
-
-            df_exibicao = df_mes.copy()
-            if setor_selecionado != "Todos":
-                df_exibicao = df_exibicao[df_exibicao['Setor'] == setor_selecionado]
-            if status_selecionado != "Todos":
-                df_exibicao = df_exibicao[df_exibicao['Status'] == status_selecionado]
-            if criticidade_selecionada != "Todos":
-                df_exibicao = df_exibicao[df_exibicao['Criticidade'] == criticidade_selecionada]
-
-            # Calculation of Aging (Days Open) based on current date
-            import datetime
-            hoje = datetime.date(2026, 6, 25)
-            
-            # Converts the date safely and calculates the difference
-            df_exibicao['Data_DT'] = pd.to_datetime(df_exibicao['Data_Abertura'], errors='coerce').dt.date
-            df_exibicao['Fim_DT'] = pd.to_datetime(df_exibicao['Data_Fechamento'], errors='coerce').dt.date
-            df_exibicao['Dias_Aberto'] = df_exibicao.apply(
-                lambda r: (hoje - r['Data_DT']).days if str(r['Status']).strip() == 'Aberta' 
-                and (pd.isna(r['Fim_DT']) or str(r['Fim_DT']).strip() in ['', 'nan', 'NaT', 'None']) 
-                and not pd.isna(r['Data_DT']) else -1,
-                axis=1
-            )
-            
-            # Applies chosen time filter
-            if filtro_dias == "0 a 3 dias":
-                df_exibicao = df_exibicao[(df_exibicao['Dias_Aberto'] >= 0) & (df_exibicao['Dias_Aberto'] <= 3)]
-            elif filtro_dias == "4 a 7 dias":
-                df_exibicao = df_exibicao[(df_exibicao['Dias_Aberto'] >= 4) & (df_exibicao['Dias_Aberto'] <= 7)]
-            elif filtro_dias == "8 a 15 dias":
-                df_exibicao = df_exibicao[(df_exibicao['Dias_Aberto'] >= 8) & (df_exibicao['Dias_Aberto'] <= 15)]
-            elif filtro_dias == "Mais de 16 dias":
-                df_exibicao = df_exibicao[df_exibicao['Dias_Aberto'] >= 16]
-
-            # Lista de OS para o seletor da IA
-            lista_os_selecao = sorted(list(df_exibicao['OS'].unique()))
-            
-            # Mapeamento e contagem estrita dos status
-            for status_chave in contagem_status.keys():
-                contagem_status[status_chave] = len(df_exibicao[df_exibicao['Status'] == status_chave])
-            
-            st.markdown("---")
-            st.subheader("🎨 Filtro de Cores no Modelo (BIM)")
-            modo_cor = st.toggle("Ativar Visão Cromática por Status", value=True)
-            
-            if modo_cor:
-                st.markdown("""
-                <div class="legenda-item"><div class="quadrado-cor" style="background-color: #ff4b4b;"></div>🔴 Aberta (Manutenção Urgente)</div>
-                <div class="legenda-item"><div class="quadrado-cor" style="background-color: #28a745;"></div>🟢 Fechado (Ativo em Conformidade)</div>
-                """, unsafe_allow_html=True)
-                
-                # Engenharia de Isolamento de IDs no Speckle
-                ids_abertos = df_exibicao[df_exibicao['Status'] == 'Aberta']['ID'].dropna().tolist()
-                opcoes_visualizador = {"ghostOthers": True}
-                if ids_abertos:
-                    opcoes_visualizador["filter"] = {"objectIds": ids_abertos}
-                
-                string_json = json.dumps(opcoes_visualizador)
-                url_modificadores = f"#embed={urllib.parse.quote(string_json)}"
-            
-            st.markdown("---")
-            st.subheader("Métricas de Manutenção")
-            
-            total_abertas_mes = len(df_mes)
-            if total_abertas_mes > 0:
-                total_fechadas_filtradas = len(df_exibicao[df_exibicao['Status'] == 'Fechado'])
-                sla_calculado = round((total_fechadas_filtradas / total_abertas_mes) * 100, 1)
-                
-                st.metric(
-                    label="SLA de Atendimento (Meta: 95%)",
-                    value=f"{sla_calculado}%",
-                    delta=f"{round(sla_calculado - 95.0, 1)}% em relação à meta",
-                    delta_color="normal" if sla_calculado >= 95 else "inverse"
-                )
-            
-        except Exception as e:
-            st.error(f"Erro ao processar as colunas: {e}")
-    else:
-        st.warning("Aguardando upload da planilha...")
-        st.metric(label="SLA de Atendimento (Meta: 95%)", value="-- %", delta="Sem dados")
-
-# 3. Layout de Tela: Área Central (Maquete 3D Panorâmica do Speckle Dinâmica)
-st.title("Visualizador Operacional de Ativos 3D")
-
-url_final_speckle = f"{url_base_speckle}{url_modificadores}"
-st.components.v1.iframe(url_final_speckle, height=750)
-
-st.markdown("---")
-
-# 4. Centro de Diagnóstico Avançado (IA Preditiva)
-st.subheader("🧠 Centro de Diagnóstico Avançado (IA Preditiva)")
-
-if arquivo_upload is not None and not df_exibicao.empty:
-    col_sel, col_diag = st.columns(2)
-    
-    with col_sel:
-        st.markdown("**🔎 Seleção de Ativo para Auditoria**")
-        os_selecionada = st.selectbox("Selecione a OS para análise da IA:", lista_os_selecao)
+    # 🔐 CSS ISOLADO COMPORTAMENTAL: Só funciona enquanto o formulário de login existir na tela
+    st.markdown("""
+        <style>
+        /* Aplica o fundo escuro azulado premium apenas se a página contiver o formulário de login */
+        .stApp:has(div[data-testid="stForm"]) {
+            background-color: #111827 !important;
+            background-image: radial-gradient(at 0% 0%, hsla(217,100%,16%,1) 0, transparent 50%), 
+                              radial-gradient(at 50% 0%, hsla(220,95%,10%,1) 0, transparent 50%) !important;
+        }
         
-        # Filtro seguro focado na OS selecionada
-        df_filtrado_os = df_exibicao[df_exibicao['OS'] == os_selecionada]
+        /* Centraliza e restringe a largura máxima da tela a 620px apenas na tela de login */
+        .stApp:has(div[data-testid="stForm"]) .block-container {
+            max-width: 620px !important;
+            padding-top: 5rem !important;
+            margin: 0 auto !important;
+        }
         
-        if not df_filtrado_os.empty:
-            id_bim = str(df_filtrado_os['ID'].values[0])
-            responsavel_tecnico = str(df_filtrado_os['Responsavel'].values[0])
-            setor_ativo = str(df_filtrado_os['Setor'].values[0])
-            status_ativo = str(df_filtrado_os['Status'].values[0])
-            descricao_falha = str(df_filtrado_os['Descrição'].values[0])
-            
-            data_raw = df_filtrado_os['Data_Abertura'].values[0]
-            data_abertura = pd.to_datetime(data_raw).strftime('%d/%m/%Y')
-            
-            injetar_sinalizacao_tela(df_filtrado_os)
-            st.info(f"""
-            **📋 Ficha Técnico do Ativo**
-            * **ID BIM:** `{id_bim}`
-            * **Responsável Técnico:** {responsavel_tecnico}
-            * **Setor:** {setor_ativo}
-            * **Status Atual:** {status_ativo}
-            * **Data de Abertura:** {data_abertura}
-            * **Histórico de Quebras:** 3 recorrências registradas nos últimos 180 dias.
-            * 📖 [Acessar Manual Técnico do Ativo](https://github.com)
-            """)
+        /* Transforma a caixa padrão em um Card Blanco Flutuante com Sombra Real */
+        div[data-testid="stForm"] {
+            background-color: #ffffff !important;
+            padding: 35px 30px !important;
+            border-radius: 16px !important;
+            border: 1px solid #e5e7eb !important;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.3) !important;
+        }
         
-    with col_diag:
-        st.markdown("**⚡ Análise de Engenharia Operacional da IA**")
+        /* Estilização das fontes e rótulos dos campos */
+        label { color: #374151 !important; font-weight: 600 !important; font-size: 14px !important; }
         
-        if not df_filtrado_os.empty:
-            if status_ativo == 'Aberta':
+        /* Inputs arredondados, limpos e com texto escuro visível */
+        .stTextInput > div > div > input {
+            border-radius: 8px !important;
+            border: 1px solid #d1d5db !important;
+            padding: 12px !important;
+            background-color: #f9fafb !important;
+            color: #111827 !important;
+        }
+        
+        /* Botão de Login Azul Safira customizado com gradiente corporativo */
+        div.stFormSubmitButton > button {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%) !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.5px !important;
+            border-radius: 8px !important;
+            border: none !important;
+            padding: 12px 0px !important;
+            font-size: 16px !important;
+            margin-top: 10px !important;
+            box-shadow: 0 4px 10px rgba(30, 58, 138, 0.3) !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    # Formulário de Credenciais Premium
+    with st.form("menu_login_premium"):
+        
+        # Logotipo em código HTML puro (Imune a erros de CORS ou quedas de links de imagem)
+        st.markdown("""
+            <div style='text-align: center; margin-bottom: 25px;'>
+                <div style='display: inline-block; background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); padding: 10px 20px; border-radius: 8px; margin-bottom: 12px; box-shadow: 0 4px 6px rgba(30, 58, 138, 0.2);'>
+                    <span style='color: #ffffff; font-size: 28px; font-weight: 900; letter-spacing: 2px;'>RB</span>
+                    <span style='color: #93c5fd; font-size: 28px; font-weight: 300; letter-spacing: 2px;'>CONSULTORIA</span>
+                </div>
+                <p style='color: #4b5563; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 5px; margin-bottom: 0px;'>Gestão Estratégica de Ativos</p>
+                <div style='height: 1px; background: linear-gradient(to right, transparent, #e5e7eb, transparent); margin-top: 15px;'></div>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        # Inputs de dados estruturados
+        usuario = st.text_input("👤 Usuário Corporativo", placeholder="Ex: admin")
+        senha = st.text_input("🔑 Senha de Acesso", type="password", placeholder="Digite sua senha")
+        lembrar = st.checkbox("Manter conectado neste dispositivo")
+        
+        botao_entrar = st.form_submit_button("Entrar no Sistema", use_container_width=True)
+        
+    if botao_entrar:
+        usuarios_validos = {
+            "admin": "admin",
+            "fiat": "fiat123",
+            "ambev": "ambev123"
+        }
+        
+        if usuario in usuarios_validos and senha == usuarios_validos[usuario]:
+            st.session_state.logged_in = True
+            st.session_state.cliente_ativo = usuario.upper()
+            st.rerun()
+        else:
+            st.error("❌ Credenciais inválidas. Tente novamente.")
+
+else:
+    # 🔓 ÁREA INTERNA TOTALMENTE CONFIGURADA: Executa sem nenhuma interferência de estilo
+    pg.run()
+    
+    # Adiciona botão de Logout limpo e original na barra lateral pós-login
+    with st.sidebar:
+        st.markdown("---")
+        if st.button("Sair da Conta", use_container_width=True):
+            st.session_state.logged_in = False
+            st.rerun()
